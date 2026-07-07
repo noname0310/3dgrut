@@ -16,6 +16,15 @@ export UV_PROJECT_ENVIRONMENT="${VENV}"
 export UV_PYTHON="${VENV}/bin/python"
 export TORCH_CUDA_ARCH_LIST="${TORCH_CUDA_ARCH_LIST:-7.5;8.0;8.6;8.9;9.0;10.0;12.0+PTX}"
 export TCNN_CUDA_ARCHITECTURES="${TCNN_CUDA_ARCHITECTURES:-89}"
+export OPTIX_LIB_DIR="${OPTIX_LIB_DIR:-$(pwd)/.local/optix-libs/610.43.02}"
+export LD_LIBRARY_PATH="${OPTIX_LIB_DIR}:${LD_LIBRARY_PATH:-/usr/local/cuda/lib64}"
+
+if [[ -e "${OPTIX_LIB_DIR}/libnvoptix.so.1" ]]; then
+    echo "OptiX workaround: using ${OPTIX_LIB_DIR}"
+else
+    echo "WARNING: OptiX workaround libraries were not found at ${OPTIX_LIB_DIR}." >&2
+    echo "WARNING: 3DGRT will fail in WSL2/Docker Desktop until they are restored." >&2
+fi
 
 # Point the installed editable package at the mounted workspace, not the image's
 # build-time copy under /workspace.
@@ -38,3 +47,14 @@ if torch.cuda.is_available():
 else:
     print("tiny-cuda-nn: runtime import skipped because no CUDA device is visible")
 PY
+
+if [[ -e "${OPTIX_LIB_DIR}/libnvoptix.so.1" ]]; then
+    python - <<'PY'
+import ctypes
+import os
+
+path = os.path.join(os.environ["OPTIX_LIB_DIR"], "libnvoptix.so.1")
+ctypes.CDLL(path)
+print(f"OptiX lib: ok ({path})")
+PY
+fi

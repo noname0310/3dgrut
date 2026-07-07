@@ -15,7 +15,9 @@
     "UV_PROJECT_ENVIRONMENT": "/workspace/.venv",
     "UV_PYTHON": "/workspace/.venv/bin/python",
     "TORCH_CUDA_ARCH_LIST": "7.5;8.0;8.6;8.9;9.0;10.0;12.0+PTX",
-    "TCNN_CUDA_ARCHITECTURES": "89"
+    "TCNN_CUDA_ARCHITECTURES": "89",
+    "OPTIX_LIB_DIR": "/workspaces/3dgrut/.local/optix-libs/610.43.02",
+    "LD_LIBRARY_PATH": "/workspaces/3dgrut/.local/optix-libs/610.43.02:/usr/local/cuda/lib64"
   },
   "remoteEnv": {
     "PATH": "/workspace/.venv/bin:${containerEnv:PATH}",

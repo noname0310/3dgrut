@@ -27,6 +27,7 @@ threedgrt_tracer/include/3dgrt/kernels/slang/*.cuh*
 threedgut_tracer/include/threedgutSlang.cuh
 *.egg-info
 .idea
+.local/
 
 grid_search
 
