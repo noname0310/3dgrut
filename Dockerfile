@@ -18,6 +18,10 @@ ARG UBUNTU_VERSION=24.04
 
 FROM nvidia/cuda:${CUDA_VERSION}-devel-ubuntu${UBUNTU_VERSION}
 
+ARG CUDA_VERSION=12.8.1
+ARG TORCH_CUDA_ARCH_LIST="7.5;8.0;8.6;8.9;9.0;10.0;12.0+PTX"
+ARG TCNN_CUDA_ARCHITECTURES="89"
+
 ENV CUDA_VERSION=${CUDA_VERSION}
 ENV DEBIAN_FRONTEND=noninteractive
 ENV NVIDIA_VISIBLE_DEVICES=all
@@ -39,6 +43,8 @@ RUN curl -LsSf https://astral.sh/uv/install.sh | sh
 
 WORKDIR /workspace
 COPY . .
+ENV TORCH_CUDA_ARCH_LIST=${TORCH_CUDA_ARCH_LIST}
+ENV TCNN_CUDA_ARCHITECTURES=${TCNN_CUDA_ARCHITECTURES}
 RUN bash ./install_env_uv.sh
 
 RUN echo "source $(pwd)/.venv/bin/activate" >> ~/.bashrc

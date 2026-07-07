@@ -1,0 +1,65 @@
+{
+  "name": "3DGRUT CUDA",
+  "image": "3dgrut:cuda12",
+  "workspaceFolder": "/workspaces/${localWorkspaceFolderBasename}",
+  "runArgs": [
+    "--gpus=all",
+    "--shm-size=16g",
+    "--ipc=host"
+  ],
+  "containerEnv": {
+    "VIRTUAL_ENV": "/workspace/.venv",
+    "UV_PROJECT_ENVIRONMENT": "/workspace/.venv",
+    "UV_PYTHON": "/workspace/.venv/bin/python",
+    "TORCH_CUDA_ARCH_LIST": "7.5;8.0;8.6;8.9;9.0;10.0;12.0+PTX",
+    "TCNN_CUDA_ARCHITECTURES": "89"
+  },
+  "remoteEnv": {
+    "PATH": "/workspace/.venv/bin:${containerEnv:PATH}",
+    "PYTHONPATH": "${containerWorkspaceFolder}"
+  },
+  "postCreateCommand": "bash .devcontainer/post-create.sh",
+  "forwardPorts": [
+    8080,
+    6006
+  ],
+  "portsAttributes": {
+    "8080": {
+      "label": "viser"
+    },
+    "6006": {
+      "label": "tensorboard"
+    }
+  },
+  "customizations": {
+    "vscode": {
+      "extensions": [
+        "ms-python.python",
+        "ms-python.vscode-pylance",
+        "ms-toolsai.jupyter",
+        "ms-vscode.cpptools",
+        "ms-azuretools.vscode-docker"
+      ],
+      "settings": {
+        "python.defaultInterpreterPath": "/workspace/.venv/bin/python",
+        "python.terminal.activateEnvironment": true,
+        "terminal.integrated.defaultProfile.linux": "bash",
+        "files.watcherExclude": {
+          "**/.git/objects/**": true,
+          "**/.venv/**": true,
+          "**/runs/**": true,
+          "**/wandb/**": true,
+          "**/outputs/**": true,
+          "**/data/**": true
+        },
+        "search.exclude": {
+          "**/.venv": true,
+          "**/runs": true,
+          "**/wandb": true,
+          "**/outputs": true,
+          "**/data": true
+        }
+      }
+    }
+  }
+}
