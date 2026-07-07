@@ -23,13 +23,15 @@ import viser
 from threedgrut.datasets.protocols import Batch
 from threedgrut.datasets.utils import DEFAULT_DEVICE, fov2focal
 from threedgrut.utils.misc import to_np
+from threedgrut.utils.render import apply_background, apply_feature_decoder
 from threedgrut.utils.timer import CudaTimer
 
 
 class ViserGUI:
-    def __init__(self, conf, model, train_dataset, val_dataset, scene_bbox):
+    def __init__(self, conf, model, train_dataset, val_dataset, scene_bbox, feature_decoder=None):
         self.conf = conf
         self.model = model
+        self.feature_decoder = feature_decoder
         self.train_dataset = train_dataset
         self.val_dataset = val_dataset
         self.scene_bbox = scene_bbox
@@ -65,7 +67,7 @@ class ViserGUI:
 
         # Initialize scene visualization
         self.point_cloud = None
-        self.init_point_cloud()
+        self.update_point_cloud()
 
         @self.do_train_checkbox.on_update
         def _(_):
@@ -90,6 +92,7 @@ class ViserGUI:
         @self.show_point_cloud_checkbox.on_update
         def _(_):
             self.show_point_cloud = self.show_point_cloud_checkbox.value
+            self.update_point_cloud()
 
         @self.subsample_slider.on_update
         def _(_):
@@ -286,7 +289,7 @@ class ViserGUI:
         # Create Batch object similar to polyscope version
         inputs = Batch(
             intrinsics=[FOCAL, FOCAL, window_w / 2, window_h / 2],
-            T_to_world=torch.from_numpy(render_c2w).unsqueeze(0),
+            T_to_world=torch.tensor(render_c2w, device=DEFAULT_DEVICE, dtype=torch.float32).unsqueeze(0),
             rays_ori=torch.zeros((1, window_h, window_w, 3), device=DEFAULT_DEVICE, dtype=torch.float32),
             rays_dir=rays_dir.reshape(1, window_h, window_w, 3),
         )
@@ -295,6 +298,17 @@ class ViserGUI:
         with torch.no_grad():
             self.render_timer.start()
             outputs = self.model(inputs, train=self.viz_render_train_view)
+            if self.feature_decoder is not None:
+                outputs = apply_feature_decoder(
+                    self.feature_decoder,
+                    outputs,
+                    inputs,
+                    training=False,
+                    center_ray_encoding=bool(
+                        getattr(getattr(self.conf.model, "nht_decoder", None), "center_ray_encoding", False)
+                    ),
+                )
+            outputs = apply_background(self.model.background, outputs, inputs, training=False)
             self.render_timer.end()
             self.render_width = window_w
             self.render_height = window_h
