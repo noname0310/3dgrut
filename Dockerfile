@@ -39,6 +39,7 @@ RUN curl -LsSf https://astral.sh/uv/install.sh | sh
 
 WORKDIR /workspace
 COPY . .
+RUN find . -type f -name "*.sh" -print0 | xargs -0 sed -i 's/\r$//'
 RUN bash ./install_env_uv.sh
 
 RUN echo "source $(pwd)/.venv/bin/activate" >> ~/.bashrc

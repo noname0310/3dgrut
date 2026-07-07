@@ -1,0 +1,43 @@
+{
+  "name": "3DGRUT CUDA 12.8",
+  "build": {
+    "context": "..",
+    "dockerfile": "../Dockerfile",
+    "args": {
+      "CUDA_VERSION": "12.8.1",
+      "UBUNTU_VERSION": "24.04"
+    }
+  },
+  "workspaceFolder": "/src/3dgrut",
+  "workspaceMount": "source=${localWorkspaceFolder},target=/src/3dgrut,type=bind",
+  "runArgs": [
+    "--gpus=all",
+    "--shm-size=16g"
+  ],
+  "mounts": [
+    "source=3dgrut-torch-extensions,target=/root/.cache/torch_extensions,type=volume",
+    "source=3dgrut-uv-cache,target=/root/.cache/uv,type=volume"
+  ],
+  "remoteEnv": {
+    "PATH": "/workspace/.venv/bin:${containerEnv:PATH}",
+    "PYTHONPATH": "/src/3dgrut:${containerEnv:PYTHONPATH}",
+    "VIRTUAL_ENV": "/workspace/.venv"
+  },
+  "customizations": {
+    "vscode": {
+      "extensions": [
+        "ms-python.python",
+        "ms-python.vscode-pylance",
+        "ms-vscode.cpptools",
+        "ms-vscode.cmake-tools",
+        "ms-toolsai.jupyter"
+      ],
+      "settings": {
+        "python.defaultInterpreterPath": "/workspace/.venv/bin/python",
+        "python.terminal.activateEnvironment": false,
+        "terminal.integrated.defaultProfile.linux": "bash"
+      }
+    }
+  },
+  "postCreateCommand": "bash -lc '/workspace/.venv/bin/python -c \"import torch; print(\\\"CUDA available:\\\", torch.cuda.is_available())\"'"
+}
