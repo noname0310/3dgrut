@@ -1,6 +1,9 @@
 {
   "name": "3DGRUT CUDA",
-  "image": "3dgrut:cuda12",
+  "build": {
+    "dockerfile": "Dockerfile",
+    "context": ".."
+  },
   "workspaceFolder": "/workspaces/${localWorkspaceFolderBasename}",
   "runArgs": [
     "--gpus=all",
