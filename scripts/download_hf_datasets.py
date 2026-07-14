@@ -5,6 +5,8 @@ The resulting paths are arranged to match this repository's examples:
 
   data/nerf_synthetic/lego
   data/mipnerf360/bonsai
+  data/mipnerf360/garden
+  data/mipnerf360/bicycle
   data/tandt/{train,truck}
   data/db/{drjohnson,playroom}
 """
@@ -15,8 +17,6 @@ import argparse
 import os
 from dataclasses import dataclass
 from pathlib import Path
-
-from huggingface_hub import snapshot_download
 
 
 @dataclass(frozen=True)
@@ -42,6 +42,20 @@ TARGETS: dict[str, DatasetTarget] = {
         local_dir=".",
         patterns=("mipnerf360/bonsai/**",),
         expected_paths=("mipnerf360/bonsai/images", "mipnerf360/bonsai/sparse/0"),
+    ),
+    "garden": DatasetTarget(
+        name="garden",
+        repo_id="alexmkwizu/gaussian_training_datasets",
+        local_dir=".",
+        patterns=("mipnerf360/garden/**",),
+        expected_paths=("mipnerf360/garden/images", "mipnerf360/garden/sparse/0"),
+    ),
+    "bicycle": DatasetTarget(
+        name="bicycle",
+        repo_id="alexmkwizu/gaussian_training_datasets",
+        local_dir=".",
+        patterns=("mipnerf360/bicycle/**",),
+        expected_paths=("mipnerf360/bicycle/images", "mipnerf360/bicycle/sparse/0"),
     ),
     "tandt_db": DatasetTarget(
         name="tandt_db",
@@ -70,6 +84,8 @@ def parse_args() -> argparse.Namespace:
 
 
 def download_target(target: DatasetTarget, data_dir: Path, cache_dir: str | None, revision: str, token: str | None) -> None:
+    from huggingface_hub import snapshot_download
+
     local_dir = (data_dir / target.local_dir).resolve()
     local_dir.mkdir(parents=True, exist_ok=True)
 
@@ -101,7 +117,7 @@ def main() -> None:
     token = args.token or os.environ.get("HF_TOKEN")
 
     print(f"data_dir: {data_dir}")
-    dataset_names = args.datasets or ["lego", "bonsai", "tandt_db"]
+    dataset_names = args.datasets or ["lego", "bonsai", "garden", "bicycle", "tandt_db"]
     unknown = sorted(set(dataset_names) - set(TARGETS))
     if unknown:
         raise SystemExit(f"Unknown dataset(s): {', '.join(unknown)}. Choices: {', '.join(sorted(TARGETS))}")
